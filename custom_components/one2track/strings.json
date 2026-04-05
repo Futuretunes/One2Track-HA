@@ -1,0 +1,107 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to One2Track",
+        "description": "Enter your One2Track account credentials.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate with One2Track",
+        "description": "Your session has expired. Please enter your credentials again.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid email or password.",
+      "cannot_connect": "Cannot connect to One2Track. Check your internet connection.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This One2Track account is already configured.",
+      "reauth_successful": "Re-authentication successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "One2Track Options",
+        "data": {
+          "update_interval": "Update interval (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Battery"
+      },
+      "signal_strength": {
+        "name": "Signal strength"
+      },
+      "satellite_count": {
+        "name": "Satellites"
+      },
+      "speed": {
+        "name": "Speed"
+      },
+      "altitude": {
+        "name": "Altitude"
+      },
+      "steps": {
+        "name": "Steps"
+      },
+      "sim_balance": {
+        "name": "SIM balance"
+      },
+      "last_communication": {
+        "name": "Last communication"
+      },
+      "last_location_update": {
+        "name": "Last location update"
+      },
+      "location_type": {
+        "name": "Location type"
+      },
+      "status": {
+        "name": "Status"
+      }
+    },
+    "binary_sensor": {
+      "fall_detected": {
+        "name": "Fall detected"
+      }
+    },
+    "button": {
+      "refresh_location": {
+        "name": "Refresh location"
+      },
+      "find_device": {
+        "name": "Find device"
+      },
+      "remote_shutdown": {
+        "name": "Remote shutdown"
+      }
+    },
+    "select": {
+      "gps_interval": {
+        "name": "GPS interval"
+      },
+      "profile_mode": {
+        "name": "Profile mode"
+      }
+    },
+    "switch": {
+      "step_counter": {
+        "name": "Step counter"
+      }
+    }
+  }
+}

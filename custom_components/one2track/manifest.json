@@ -1,0 +1,12 @@
+{
+  "domain": "one2track",
+  "name": "One2Track GPS",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/one2track-ha/one2track-ha",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/one2track-ha/one2track-ha/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

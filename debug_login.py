@@ -9,7 +9,7 @@ import aiohttp
 BASE_URL = "https://www.one2trackgps.com"
 LOGIN_PATH = "/auth/users/sign_in"
 CSRF_RE = re.compile(r'<meta\s+name="csrf-token"\s+content="([^"]+)"', re.IGNORECASE)
-ACCOUNT_ID_RE = re.compile(r"/users/(\d+)")
+ACCOUNT_ID_RE = re.compile(r"/users/([^/]+)")
 
 
 async def debug_login(email: str, password: str) -> None:

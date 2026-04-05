@@ -14,7 +14,7 @@ from .const import BASE_URL, LOGIN_PATH
 _LOGGER = logging.getLogger(__name__)
 
 _CSRF_RE = re.compile(r'<meta\s+name="csrf-token"\s+content="([^"]+)"', re.IGNORECASE)
-_ACCOUNT_ID_RE = re.compile(r"/users/(\d+)")
+_ACCOUNT_ID_RE = re.compile(r"/users/([^/]+)")
 _FUNCTION_CODE_RE = re.compile(r"function=(\d+)")
 
 

@@ -1,0 +1,75 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbinden met One2Track",
+        "description": "Voer je One2Track inloggegevens in.",
+        "data": {
+          "email": "E-mail",
+          "password": "Wachtwoord"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Opnieuw inloggen bij One2Track",
+        "description": "Je sessie is verlopen. Voer je inloggegevens opnieuw in.",
+        "data": {
+          "email": "E-mail",
+          "password": "Wachtwoord"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ongeldig e-mailadres of wachtwoord.",
+      "cannot_connect": "Kan geen verbinding maken met One2Track. Controleer je internetverbinding.",
+      "unknown": "Er is een onverwachte fout opgetreden."
+    },
+    "abort": {
+      "already_configured": "Dit One2Track account is al geconfigureerd.",
+      "reauth_successful": "Opnieuw inloggen gelukt."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "One2Track Opties",
+        "data": {
+          "update_interval": "Verversingsinterval (seconden)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": { "name": "Batterij" },
+      "signal_strength": { "name": "Signaalsterkte" },
+      "satellite_count": { "name": "Satellieten" },
+      "speed": { "name": "Snelheid" },
+      "altitude": { "name": "Hoogte" },
+      "steps": { "name": "Stappen" },
+      "sim_balance": { "name": "SIM-tegoed" },
+      "last_communication": { "name": "Laatste communicatie" },
+      "last_location_update": { "name": "Laatste locatie-update" },
+      "location_type": { "name": "Locatietype" },
+      "status": { "name": "Status" }
+    },
+    "binary_sensor": {
+      "fall_detected": { "name": "Val gedetecteerd" },
+      "geofence": { "name": "Geofence" }
+    },
+    "button": {
+      "refresh_location": { "name": "Locatie vernieuwen" },
+      "find_device": { "name": "Apparaat zoeken" },
+      "remote_shutdown": { "name": "Op afstand uitschakelen" }
+    },
+    "select": {
+      "gps_interval": { "name": "GPS-interval" },
+      "profile_mode": { "name": "Profielmodus" }
+    },
+    "switch": {
+      "step_counter": { "name": "Stappenteller" }
+    },
+    "text": {
+      "sos_number": { "name": "SOS-nummer" }
+    }
+  }
+}

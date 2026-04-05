@@ -36,16 +36,22 @@ class One2TrackCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         )
         self.api = api
         self.device_capabilities: dict[str, list[str]] = {}
-        self._capabilities_fetched = False
+        self.geofences: dict[str, list[dict[str, Any]]] = {}
+        self._metadata_fetched = False
+        self._consecutive_auth_failures = 0
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         """Fetch device data from One2Track."""
         try:
             devices = await self.api.get_devices()
+            self._consecutive_auth_failures = 0
         except One2TrackAuthError as err:
-            raise ConfigEntryAuthFailed(
-                f"Authentication failed: {err}"
-            ) from err
+            self._consecutive_auth_failures += 1
+            if self._consecutive_auth_failures >= 3:
+                raise ConfigEntryAuthFailed(
+                    f"Authentication failed {self._consecutive_auth_failures} times: {err}"
+                ) from err
+            raise UpdateFailed(f"Auth error (attempt {self._consecutive_auth_failures}): {err}") from err
         except One2TrackConnectionError as err:
             raise UpdateFailed(f"Error communicating with One2Track: {err}") from err
 
@@ -56,20 +62,26 @@ class One2TrackCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             if uuid:
                 result[uuid] = device
 
-        # Fetch capabilities once on first successful data load
-        if not self._capabilities_fetched and result:
-            self._capabilities_fetched = True
+        # Fetch capabilities and geofences once on first successful data load
+        if not self._metadata_fetched and result:
+            self._metadata_fetched = True
             for uuid in result:
+                # Capabilities
                 try:
                     caps = await self.api.get_device_capabilities(uuid)
                     self.device_capabilities[uuid] = caps
-                    _LOGGER.debug(
-                        "Device %s capabilities: %s", uuid, caps
-                    )
+                    _LOGGER.debug("Device %s capabilities: %s", uuid, caps)
                 except Exception:  # noqa: BLE001
-                    _LOGGER.warning(
-                        "Could not fetch capabilities for %s", uuid
-                    )
+                    _LOGGER.warning("Could not fetch capabilities for %s", uuid)
                     self.device_capabilities[uuid] = []
+
+                # Geofences
+                try:
+                    fences = await self.api.get_device_geofences(uuid)
+                    self.geofences[uuid] = fences
+                    _LOGGER.debug("Device %s geofences: %d", uuid, len(fences))
+                except Exception:  # noqa: BLE001
+                    _LOGGER.warning("Could not fetch geofences for %s", uuid)
+                    self.geofences[uuid] = []
 
         return result

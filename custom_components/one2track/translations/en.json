@@ -40,68 +40,36 @@
   },
   "entity": {
     "sensor": {
-      "battery": {
-        "name": "Battery"
-      },
-      "signal_strength": {
-        "name": "Signal strength"
-      },
-      "satellite_count": {
-        "name": "Satellites"
-      },
-      "speed": {
-        "name": "Speed"
-      },
-      "altitude": {
-        "name": "Altitude"
-      },
-      "steps": {
-        "name": "Steps"
-      },
-      "sim_balance": {
-        "name": "SIM balance"
-      },
-      "last_communication": {
-        "name": "Last communication"
-      },
-      "last_location_update": {
-        "name": "Last location update"
-      },
-      "location_type": {
-        "name": "Location type"
-      },
-      "status": {
-        "name": "Status"
-      }
+      "battery": { "name": "Battery" },
+      "signal_strength": { "name": "Signal strength" },
+      "satellite_count": { "name": "Satellites" },
+      "speed": { "name": "Speed" },
+      "altitude": { "name": "Altitude" },
+      "steps": { "name": "Steps" },
+      "sim_balance": { "name": "SIM balance" },
+      "last_communication": { "name": "Last communication" },
+      "last_location_update": { "name": "Last location update" },
+      "location_type": { "name": "Location type" },
+      "status": { "name": "Status" }
     },
     "binary_sensor": {
-      "fall_detected": {
-        "name": "Fall detected"
-      }
+      "fall_detected": { "name": "Fall detected" },
+      "geofence": { "name": "Geofence" }
     },
     "button": {
-      "refresh_location": {
-        "name": "Refresh location"
-      },
-      "find_device": {
-        "name": "Find device"
-      },
-      "remote_shutdown": {
-        "name": "Remote shutdown"
-      }
+      "refresh_location": { "name": "Refresh location" },
+      "find_device": { "name": "Find device" },
+      "remote_shutdown": { "name": "Remote shutdown" }
     },
     "select": {
-      "gps_interval": {
-        "name": "GPS interval"
-      },
-      "profile_mode": {
-        "name": "Profile mode"
-      }
+      "gps_interval": { "name": "GPS interval" },
+      "profile_mode": { "name": "Profile mode" }
     },
     "switch": {
-      "step_counter": {
-        "name": "Step counter"
-      }
+      "step_counter": { "name": "Step counter" }
+    },
+    "text": {
+      "sos_number": { "name": "SOS number" }
     }
   }
 }

@@ -2,19 +2,26 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
 from homeassistant.components.device_tracker import SourceType, TrackerEntity
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import One2TrackConfigEntry
-from .const import DOMAIN
+from .const import STALE_LOCATION_MINUTES
 from .coordinator import One2TrackCoordinator
+from .entity import One2TrackEntity
 
 _LOGGER = logging.getLogger(__name__)
+
+_LOCATION_TYPE_ICONS = {
+    "GPS": "mdi:crosshairs-gps",
+    "WIFI": "mdi:wifi",
+    "LBS": "mdi:cellphone-wireless",
+}
 
 
 async def async_setup_entry(
@@ -31,39 +38,46 @@ async def async_setup_entry(
     )
 
 
-class One2TrackDeviceTracker(CoordinatorEntity[One2TrackCoordinator], TrackerEntity):
+class One2TrackDeviceTracker(One2TrackEntity, TrackerEntity):
     """Represent a One2Track GPS watch on the map."""
 
-    _attr_has_entity_name = True
     _attr_name = None  # Use device name
 
     def __init__(self, coordinator: One2TrackCoordinator, uuid: str) -> None:
-        super().__init__(coordinator)
-        self._uuid = uuid
+        super().__init__(coordinator, uuid)
         self._attr_unique_id = f"{uuid}_tracker"
-
-    @property
-    def _device_data(self) -> dict[str, Any]:
-        return self.coordinator.data.get(self._uuid, {})
 
     @property
     def _location_data(self) -> dict[str, Any]:
         return self._device_data.get("last_location") or {}
 
     @property
-    def device_info(self) -> dict[str, Any]:
-        data = self._device_data
-        return {
-            "identifiers": {(DOMAIN, self._uuid)},
-            "name": data.get("name", f"One2Track {self._uuid[:8]}"),
-            "manufacturer": "One2Track",
-            "model": data.get("device_model_name", "GPS Watch"),
-            "serial_number": data.get("serial_number"),
-        }
-
-    @property
     def source_type(self) -> SourceType:
         return SourceType.GPS
+
+    @property
+    def icon(self) -> str:
+        loc_type = self._location_data.get("location_type", "")
+        return _LOCATION_TYPE_ICONS.get(loc_type, "mdi:crosshairs-gps")
+
+    @property
+    def available(self) -> bool:
+        """Mark unavailable if location data is stale."""
+        if not super().available:
+            return False
+        loc = self._location_data
+        last_update = loc.get("last_location_update") or loc.get("last_communication")
+        if not last_update:
+            return False
+        try:
+            dt = datetime.fromisoformat(str(last_update))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            age_minutes = (now - dt).total_seconds() / 60
+            return age_minutes < STALE_LOCATION_MINUTES
+        except (ValueError, TypeError):
+            return True
 
     @property
     def latitude(self) -> float | None:
@@ -98,11 +112,13 @@ class One2TrackDeviceTracker(CoordinatorEntity[One2TrackCoordinator], TrackerEnt
                 return int(float(accuracy))
             except (ValueError, TypeError):
                 pass
-        # Fallback: GPS is ~10m, WiFi/LBS is ~100m
+        # Fallback based on location type
         loc_type = self._location_data.get("location_type", "")
         if loc_type == "GPS":
             return 10
-        return 100
+        if loc_type == "WIFI":
+            return 50
+        return 100  # LBS / unknown
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -118,5 +134,7 @@ class One2TrackDeviceTracker(CoordinatorEntity[One2TrackCoordinator], TrackerEnt
             attrs["last_communication"] = last_comm
         if course := meta.get("course"):
             attrs["heading"] = course
+        if accuracy := meta.get("accuracy_meters"):
+            attrs["accuracy_meters"] = accuracy
 
         return attrs

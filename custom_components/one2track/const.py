@@ -41,3 +41,12 @@ GPS_INTERVAL_OPTIONS = {
     "300": "5 minutes",
     "600": "10 minutes",
 }
+
+# Known device model IDs to names
+DEVICE_MODELS = {
+    27: "Connect MOVE",
+    77: "Connect UP",
+}
+
+# Stale location threshold in minutes
+STALE_LOCATION_MINUTES = 30

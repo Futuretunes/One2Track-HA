@@ -286,6 +286,28 @@ class One2TrackApiClient:
 
         return _FUNCTION_CODE_RE.findall(html)
 
+    async def get_device_geofences(self, uuid: str) -> list[dict[str, Any]]:
+        """Fetch geofences for a device."""
+        try:
+            data = await self._request(
+                "GET",
+                f"/devices/{uuid}/geofences",
+                headers={"Accept": "application/json"},
+            )
+        except (One2TrackConnectionError, One2TrackAuthError):
+            _LOGGER.warning("Could not fetch geofences for device %s", uuid)
+            return []
+
+        if not isinstance(data, list):
+            return []
+
+        geofences = []
+        for item in data:
+            if isinstance(item, dict):
+                geofence = item.get("geofence", item)
+                geofences.append(geofence)
+        return geofences
+
     async def send_command(
         self, uuid: str, cmd_code: str, cmd_values: list[str] | None = None,
     ) -> bool:

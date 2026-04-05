@@ -14,7 +14,6 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import (
     PERCENTAGE,
-    SIGNAL_STRENGTH_DECIBELS,
     EntityCategory,
     UnitOfLength,
     UnitOfSpeed,
@@ -22,11 +21,10 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import One2TrackConfigEntry
-from .const import DOMAIN
 from .coordinator import One2TrackCoordinator
+from .entity import One2TrackEntity
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -34,7 +32,7 @@ class One2TrackSensorDescription(SensorEntityDescription):
     """Describe a One2Track sensor."""
 
     value_fn: str  # dot-separated path into device data
-    convert: str | None = None  # "float", "int", "cents_to_eur"
+    convert: str | None = None  # "float", "int", "balance", "timestamp"
 
 
 SENSOR_DESCRIPTIONS: tuple[One2TrackSensorDescription, ...] = (
@@ -98,7 +96,7 @@ SENSOR_DESCRIPTIONS: tuple[One2TrackSensorDescription, ...] = (
         native_unit_of_measurement="EUR",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn="simcard.balance_cents",
-        convert="cents_to_eur",
+        convert="balance",
     ),
     One2TrackSensorDescription(
         key="last_communication",
@@ -158,9 +156,9 @@ def _convert_value(raw: Any, convert: str | None) -> StateType:
             return float(raw)
         except (ValueError, TypeError):
             return None
-    if convert == "cents_to_eur":
+    if convert == "balance":
         try:
-            return round(float(raw) / 100, 2)
+            return round(float(raw), 2)
         except (ValueError, TypeError):
             return None
     if convert == "timestamp":
@@ -193,10 +191,9 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class One2TrackSensor(CoordinatorEntity[One2TrackCoordinator], SensorEntity):
+class One2TrackSensor(One2TrackEntity, SensorEntity):
     """A sensor for a One2Track GPS watch."""
 
-    _attr_has_entity_name = True
     entity_description: One2TrackSensorDescription
 
     def __init__(
@@ -205,20 +202,9 @@ class One2TrackSensor(CoordinatorEntity[One2TrackCoordinator], SensorEntity):
         uuid: str,
         description: One2TrackSensorDescription,
     ) -> None:
-        super().__init__(coordinator)
-        self._uuid = uuid
+        super().__init__(coordinator, uuid)
         self.entity_description = description
         self._attr_unique_id = f"{uuid}_{description.key}"
-
-    @property
-    def device_info(self) -> dict[str, Any]:
-        data = self.coordinator.data.get(self._uuid, {})
-        return {
-            "identifiers": {(DOMAIN, self._uuid)},
-            "name": data.get("name", f"One2Track {self._uuid[:8]}"),
-            "manufacturer": "One2Track",
-            "model": data.get("device_model_name", "GPS Watch"),
-        }
 
     @property
     def native_value(self) -> StateType:

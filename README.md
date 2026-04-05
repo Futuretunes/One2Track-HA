@@ -6,8 +6,10 @@ Custom [Home Assistant](https://www.home-assistant.io/) integration for [One2Tra
 
 ### Device Tracker
 - GPS position on the Home Assistant map
-- GPS accuracy based on positioning method (GPS/WiFi/LBS)
-- Address, location type, heading, and last communication as attributes
+- Dynamic icon based on location type (GPS / WiFi / Cell tower)
+- GPS accuracy from the watch or estimated by positioning method
+- Stale location detection — marks unavailable if no update in 30 minutes
+- Address, location type, heading, and accuracy as attributes
 
 ### Sensors
 | Sensor | Unit | Description |
@@ -18,16 +20,17 @@ Custom [Home Assistant](https://www.home-assistant.io/) integration for [One2Tra
 | Speed | km/h | Current speed |
 | Altitude | m | Current altitude |
 | Steps | count | Step counter (daily total) |
-| SIM balance | EUR | Prepaid SIM card balance |
+| SIM balance | EUR | SIM card balance |
 | Last communication | timestamp | Last time the watch contacted the server |
 | Last location update | timestamp | Last GPS fix |
 | Location type | — | GPS, WiFi, or LBS |
 | Status | — | Online status |
 
-### Binary Sensor
+### Binary Sensors
 | Sensor | Description |
 |---|---|
 | Fall detected | Tumble/fall detection alert |
+| Geofence (per zone) | Whether the watch is inside a geofence configured on One2Track |
 
 ### Buttons
 | Button | Description |
@@ -47,10 +50,22 @@ Custom [Home Assistant](https://www.home-assistant.io/) integration for [One2Tra
 |---|---|
 | Step counter | Enable/disable step counting |
 
-### Notify
-Send text messages to watches via the `notify` platform.
+### Text
+| Entity | Description |
+|---|---|
+| SOS number | Configure the emergency SOS number on the watch |
 
-> **Note:** Select, switch, and button entities only appear if the watch model supports the corresponding command. Capabilities are auto-detected per device.
+### Services
+| Service | Description |
+|---|---|
+| `one2track.send_message` | Send a text message to a watch |
+| `one2track.set_phonebook` | Set phonebook entries on a watch |
+| `one2track.set_quiet_times` | Configure quiet time periods |
+
+### Diagnostics
+Full diagnostic dump available via **Settings → Devices → One2Track → Download Diagnostics**. Sensitive data (location, names, phone numbers) is automatically redacted.
+
+> **Note:** Select, switch, button, and text entities only appear if the watch model supports the corresponding command. Capabilities are auto-detected per device.
 
 ## Installation
 
@@ -92,6 +107,7 @@ The integration uses a dedicated HTTP session with its own cookie jar and implem
 - **Lock-guarded re-auth** to prevent multiple concurrent login attempts
 - **Fresh CSRF tokens** before every write operation
 - **Content-type validation** to detect and recover from unexpected responses
+- **Progressive auth failure handling** — temporary failures retry, persistent failures (3+) trigger the HA re-auth flow
 
 ### Rate limits
 
@@ -105,16 +121,26 @@ The integration uses dynamic capability discovery and should work with any One2T
 - Connect MOVE
 - Connect UP
 
+## Translations
+
+The integration is available in:
+- English
+- Dutch (Nederlands)
+
 ## Troubleshooting
 
 ### "Invalid email or password"
 Verify your credentials work at [one2trackgps.com](https://www.one2trackgps.com/). The integration uses the same login.
 
 ### Entities show "unavailable"
-Check the Home Assistant logs for `one2track` entries. The most common cause is a temporary connection issue — the integration will automatically retry.
+- **Device tracker**: Goes unavailable if the last location update is older than 30 minutes — this means the watch hasn't reported in. Check if it's powered on and has signal.
+- **Other entities**: Check the Home Assistant logs for `one2track` entries. The most common cause is a temporary connection issue — the integration will automatically retry.
 
 ### Missing buttons/selects/switches
 These entities only appear if the watch model supports the corresponding command. This is detected automatically on startup.
+
+### Diagnostics
+Download diagnostics from the device page to share when reporting issues. Sensitive data is automatically redacted.
 
 ## License
 

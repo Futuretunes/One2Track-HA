@@ -4,15 +4,14 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.notify import DOMAIN as NOTIFY_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.discovery import async_load_platform
 
 from .api import One2TrackApiClient
 from .const import DOMAIN
 from .coordinator import One2TrackCoordinator
+from .services import async_setup_services, async_unload_services
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +22,7 @@ PLATFORMS: list[Platform] = [
     Platform.SELECT,
     Platform.SENSOR,
     Platform.SWITCH,
+    Platform.TEXT,
 ]
 
 type One2TrackConfigEntry = ConfigEntry[One2TrackCoordinator]
@@ -50,16 +50,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: One2TrackConfigEntry) ->
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # Set up notify platform via discovery
-    hass.async_create_task(
-        async_load_platform(
-            hass,
-            NOTIFY_DOMAIN,
-            DOMAIN,
-            {"coordinator": coordinator},
-            {},
-        )
-    )
+    # Register services
+    await async_setup_services(hass)
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
@@ -72,6 +64,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: One2TrackConfigEntry) -
 
     if unload_ok:
         await entry.runtime_data.api.close()
+
+        # Only unload services if no other entries remain
+        remaining = [
+            e for e in hass.config_entries.async_entries(DOMAIN)
+            if e.entry_id != entry.entry_id
+        ]
+        if not remaining:
+            await async_unload_services(hass)
 
     return unload_ok
 

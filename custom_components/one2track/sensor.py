@@ -142,7 +142,7 @@ def _resolve_value(data: dict[str, Any], path: str) -> Any:
     return current
 
 
-def _convert_value(raw: Any, convert: str | None) -> StateType:
+def _convert_value(raw: Any, convert: str | None) -> StateType | datetime:
     """Convert a raw API value to a sensor state."""
     if raw is None:
         return None
@@ -166,7 +166,7 @@ def _convert_value(raw: Any, convert: str | None) -> StateType:
             dt = datetime.fromisoformat(str(raw))
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
-            return dt.isoformat()
+            return dt
         except (ValueError, TypeError):
             return None
     # No conversion — return as string
@@ -207,7 +207,7 @@ class One2TrackSensor(One2TrackEntity, SensorEntity):
         self._attr_unique_id = f"{uuid}_{description.key}"
 
     @property
-    def native_value(self) -> StateType:
+    def native_value(self) -> StateType | datetime:
         data = self.coordinator.data.get(self._uuid, {})
         raw = _resolve_value(data, self.entity_description.value_fn)
         return _convert_value(raw, self.entity_description.convert)
